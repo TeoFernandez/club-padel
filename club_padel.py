@@ -3,7 +3,7 @@ from tkinter import ttk
 import mysql.connector
 
 # Conexión a la base de datos
-cnx=mysql.connector.connect(host="localhost",
+cnx = mysql.connector.connect(host="localhost",
                             user="root",
                             password="1234",
                             database="clubpadel",
@@ -31,13 +31,38 @@ def agregar_horario():
     cnx.commit()
     limpiar_campos()
 
+# Función para editar un socio
+def editar_socio():
+    id_socio = entry_id_socio_editar.get()
+    nombre = entry_nombre.get()
+    apellido = entry_apellido.get()
+    telefono = entry_telefono.get()
+    email = entry_email.get()
+    cursor.execute("UPDATE socios SET nombre = %s, apellido = %s, telefono = %s, email = %s WHERE id_socio = %s", 
+                (nombre, apellido, telefono, email, id_socio))
+    cnx.commit()
+    limpiar_campos()
+
+# Función para editar un horario
+def editar_horario():
+    id_horario = entry_id_horario_editar.get()
+    id_socio = combo_socios.get()
+    fecha = entry_fecha.get()
+    hora_inicio = entry_hora_inicio.get()
+    hora_fin = entry_hora_fin.get()
+    cancha = entry_cancha.get()
+    cursor.execute("UPDATE horarios SET id_socio = %s, fecha = %s, hora_inicio = %s, hora_fin = %s, cancha = %s WHERE id_horario = %s", 
+                (id_socio, fecha, hora_inicio, hora_fin, cancha, id_horario))
+    cnx.commit()
+    limpiar_campos()
+
 # Función para mostrar socios
 def mostrar_socios():
     cursor.execute("SELECT * FROM socios")
     resultados = cursor.fetchall()
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
-        texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Nombre: {resultado[1]} {resultado[2]}\n")
+        texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Nombre: {resultado[1]} {resultado[2]} - Teléfono: {resultado[3]} - Email: {resultado[4]}\n")
 
 # Función para mostrar horarios
 def mostrar_horarios():
@@ -49,17 +74,32 @@ def mostrar_horarios():
 
 # Función para eliminar un socio
 def eliminar_socio():
-    id_socio = entry_id_socio.get()
+    id_socio = entry_id_socio_eliminar.get()
     cursor.execute("DELETE FROM socios WHERE id_socio = %s", (id_socio,))
     cnx.commit()
     limpiar_campos()
 
 # Función para eliminar un horario
 def eliminar_horario():
-    id_horario = entry_id_horario.get()
+    id_horario = entry_id_horario_eliminar.get()
     cursor.execute("DELETE FROM horarios WHERE id_horario = %s", (id_horario,))
     cnx.commit()
     limpiar_campos()
+
+# Función para limpiar campos
+def limpiar_campos():
+    entry_nombre.delete(0, tk.END)
+    entry_apellido.delete(0, tk.END)
+    entry_telefono.delete(0, tk.END)
+    entry_email.delete(0, tk.END)
+    entry_fecha.delete(0, tk.END)
+    entry_hora_inicio.delete(0, tk.END)
+    entry_hora_fin.delete(0, tk.END)
+    entry_cancha.delete(0, tk.END)
+    entry_id_socio_editar.delete(0, tk.END)
+    entry_id_horario_editar.delete(0, tk.END)
+    entry_id_socio_eliminar.delete(0, tk.END)
+    entry_id_horario_eliminar.delete(0, tk.END)
 
 # Ventana principal
 ventana = tk.Tk()
@@ -69,7 +109,7 @@ ventana.title("Club de Pádel")
 label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24))
 label_titulo.grid(column=0, row=0, columnspan=2)
 
-# Frame para agregar socios
+# Frame para agregar o editar socios
 frame_socios = tk.Frame(ventana)
 frame_socios.grid(column=0, row=1)
 
@@ -96,7 +136,15 @@ entry_email.grid(column=1, row=3)
 boton_agregar_socio = tk.Button(frame_socios, text="Agregar Socio", command=agregar_socio)
 boton_agregar_socio.grid(column=1, row=4)
 
-# Frame para agregar horarios
+label_id_socio_editar = tk.Label(frame_socios, text="ID Socio a editar:")
+label_id_socio_editar.grid(column=0, row=5)
+entry_id_socio_editar = tk.Entry(frame_socios)
+entry_id_socio_editar.grid(column=1, row=5)
+
+boton_editar_socio = tk.Button(frame_socios, text="Editar Socio", command=editar_socio)
+boton_editar_socio.grid(column=1, row=6)
+
+# Frame para agregar o editar horarios
 frame_horarios = tk.Frame(ventana)
 frame_horarios.grid(column=1, row=1)
 
@@ -128,7 +176,15 @@ entry_cancha.grid(column=1, row=4)
 boton_agregar_horario = tk.Button(frame_horarios, text="Agregar Horario", command=agregar_horario)
 boton_agregar_horario.grid(column=1, row=5)
 
-# Frame para mostrar resultados
+label_id_horario_editar = tk.Label(frame_horarios, text="ID Horario a editar:")
+label_id_horario_editar.grid(column=0, row=6)
+entry_id_horario_editar = tk.Entry(frame_horarios)
+entry_id_horario_editar.grid(column=1, row=6)
+
+boton_editar_horario = tk.Button(frame_horarios, text="Editar Horario", command=editar_horario)
+boton_editar_horario.grid(column=1, row=7)
+
+# Frame para mostrar resultados y eliminar registros
 frame_resultados = tk.Frame(ventana)
 frame_resultados.grid(column=0, row=2, columnspan=2)
 
@@ -138,41 +194,27 @@ boton_mostrar_socios.grid(column=0, row=0)
 boton_mostrar_horarios = tk.Button(frame_resultados, text="Mostrar Horarios", command=mostrar_horarios)
 boton_mostrar_horarios.grid(column=1, row=0)
 
-texto_resultados = tk.Text(frame_resultados)
+texto_resultados = tk.Text(frame_resultados, height=10, width=80)
 texto_resultados.grid(column=0, row=1, columnspan=2)
 
-# Frame para eliminar registros
 frame_eliminar = tk.Frame(ventana)
 frame_eliminar.grid(column=0, row=3, columnspan=2)
 
 label_id_socio_eliminar = tk.Label(frame_eliminar, text="ID Socio a eliminar:")
 label_id_socio_eliminar.grid(column=0, row=0)
-entry_id_socio = tk.Entry(frame_eliminar)
-entry_id_socio.grid(column=1, row=0)
+entry_id_socio_eliminar = tk.Entry(frame_eliminar)
+entry_id_socio_eliminar.grid(column=1, row=0)
 
 boton_eliminar_socio = tk.Button(frame_eliminar, text="Eliminar Socio", command=eliminar_socio)
 boton_eliminar_socio.grid(column=1, row=1)
 
 label_id_horario_eliminar = tk.Label(frame_eliminar, text="ID Horario a eliminar:")
 label_id_horario_eliminar.grid(column=0, row=2)
-entry_id_horario = tk.Entry(frame_eliminar)
-entry_id_horario.grid(column=1, row=2)
+entry_id_horario_eliminar = tk.Entry(frame_eliminar)
+entry_id_horario_eliminar.grid(column=1, row=2)
 
 boton_eliminar_horario = tk.Button(frame_eliminar, text="Eliminar Horario", command=eliminar_horario)
 boton_eliminar_horario.grid(column=1, row=3)
-
-# Función para limpiar campos
-def limpiar_campos():
-    entry_nombre.delete(0, tk.END)
-    entry_apellido.delete(0, tk.END)
-    entry_telefono.delete(0, tk.END)
-    entry_email.delete(0, tk.END)
-    entry_fecha.delete(0, tk.END)
-    entry_hora_inicio.delete(0, tk.END)
-    entry_hora_fin.delete(0, tk.END)
-    entry_cancha.delete(0, tk.END)
-    entry_id_socio.delete(0, tk.END)
-    entry_id_horario.delete(0, tk.END)
 
 # Inicializar combobox de socios
 cursor.execute("SELECT id_socio FROM socios")
