@@ -2,15 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 
-# Configuración de la conexión a la base de datos
 # Conexión a la base de datos
 cnx=mysql.connector.connect(host="localhost",
                             user="root",
                             password="1234",
                             database="clubpadel",
                             port="3307")
-
-# Cursor para ejecutar consultas
 cursor = cnx.cursor()
 
 # Función para agregar un socio
@@ -65,15 +62,15 @@ def eliminar_horario():
     limpiar_campos()
 
 # Ventana principal
-root = tk.Tk()
-root.title("Club de Pádel")
+ventana = tk.Tk()
+ventana.title("Club de Pádel")
 
 # Título
-label_titulo = tk.Label(root, text="Club de Pádel", font=("Arial", 24))
+label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24))
 label_titulo.grid(column=0, row=0, columnspan=2)
 
 # Frame para agregar socios
-frame_socios = tk.Frame(root)
+frame_socios = tk.Frame(ventana)
 frame_socios.grid(column=0, row=1)
 
 label_nombre = tk.Label(frame_socios, text="Nombre:")
@@ -100,7 +97,7 @@ boton_agregar_socio = tk.Button(frame_socios, text="Agregar Socio", command=agre
 boton_agregar_socio.grid(column=1, row=4)
 
 # Frame para agregar horarios
-frame_horarios = tk.Frame(root)
+frame_horarios = tk.Frame(ventana)
 frame_horarios.grid(column=1, row=1)
 
 label_id_socio = tk.Label(frame_horarios, text="ID Socio:")
@@ -132,7 +129,7 @@ boton_agregar_horario = tk.Button(frame_horarios, text="Agregar Horario", comman
 boton_agregar_horario.grid(column=1, row=5)
 
 # Frame para mostrar resultados
-frame_resultados = tk.Frame(root)
+frame_resultados = tk.Frame(ventana)
 frame_resultados.grid(column=0, row=2, columnspan=2)
 
 boton_mostrar_socios = tk.Button(frame_resultados, text="Mostrar Socios", command=mostrar_socios)
@@ -145,7 +142,7 @@ texto_resultados = tk.Text(frame_resultados)
 texto_resultados.grid(column=0, row=1, columnspan=2)
 
 # Frame para eliminar registros
-frame_eliminar = tk.Frame(root)
+frame_eliminar = tk.Frame(ventana)
 frame_eliminar.grid(column=0, row=3, columnspan=2)
 
 label_id_socio_eliminar = tk.Label(frame_eliminar, text="ID Socio a eliminar:")
@@ -183,7 +180,7 @@ socios = cursor.fetchall()
 combo_socios['values'] = [socio[0] for socio in socios]
 
 # Iniciar bucle principal
-root.mainloop()
+ventana.mainloop()
 
 # Cerrar conexión a la base de datos
 cnx.close()
