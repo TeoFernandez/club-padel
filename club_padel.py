@@ -1,4 +1,4 @@
-import tkinter as tk  
+import tkinter as tk   
 from tkinter import ttk
 import mysql.connector
 
@@ -117,7 +117,7 @@ def limpiar_campos():
 # Ventana principal
 ventana = tk.Tk()
 ventana.title("Club de Pádel")
-ventana.geometry("1100x800")  # Ajustar tamaño de la ventana
+ventana.geometry("900x700")  # Ajustar tamaño de la ventana
 
 # Título
 label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24))
@@ -167,10 +167,10 @@ frame_horarios.grid(column=1, row=1)
 
 label_id_socio = tk.Label(frame_horarios, text="ID Socio:", font=("Arial", 12))
 label_id_socio.grid(column=0, row=0)
-combo_socios = ttk.Combobox(frame_horarios, width=28)
+combo_socios = tk.Entry(frame_horarios, width=30, font=("Arial",12))
 combo_socios.grid(column=1, row=0)
 
-label_fecha = tk.Label(frame_horarios, text="Fecha:", font=("Arial", 12))
+label_fecha = tk.Label(frame_horarios, text="Fecha (AÑO-MES-DIA):", font=("Arial", 12))
 label_fecha.grid(column=0, row=1)
 entry_fecha = tk.Entry(frame_horarios, width=30, font=("Arial", 12))
 entry_fecha.grid(column=1, row=1)
