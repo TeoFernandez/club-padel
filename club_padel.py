@@ -83,7 +83,7 @@ def mostrar_canchas():
     resultados = cursor.fetchall()
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
-        texto_resultados.insert(tk.END, f"ID Cancha: {resultado[0]} - : {resultado[1]} - Estado: {resultado[2]}\n")
+        texto_resultados.insert(tk.END, f"Cancha: {resultado[0]} - Superficie: {resultado[1]} - Estado: {resultado[2]}\n")
 
 # Función para eliminar un socio
 def eliminar_socio():
@@ -98,6 +98,27 @@ def eliminar_horario():
     cursor.execute("DELETE FROM horarios WHERE id_horario = %s", (id_horario,))
     cnx.commit()
     limpiar_campos()
+
+# Función para consultar disponibilidad de la cancha
+def consultar_disponibilidad():
+    id_cancha = entry_cancha_consulta.get()
+    fecha = entry_fecha_consulta.get()
+    hora_inicio = entry_hora_inicio_consulta.get()
+    hora_fin = entry_hora_fin_consulta.get()
+    
+    try:
+        # Ejecutar el procedimiento almacenado
+        cursor.callproc("alquiler_cancha", (id_cancha, fecha, hora_inicio, hora_fin))
+        
+        # Recuperar resultados
+        for result in cursor.stored_results():
+            disponibilidad = result.fetchone()[0]
+        
+        texto_resultados.delete(1.0, tk.END)
+        texto_resultados.insert(tk.END, f"Resultado: {disponibilidad}\n")
+    except mysql.connector.Error as err:
+        texto_resultados.delete(1.0, tk.END)
+        texto_resultados.insert(tk.END, f"Error: {err}\n")
 
 # Función para limpiar campos
 def limpiar_campos():
@@ -117,7 +138,7 @@ def limpiar_campos():
 # Ventana principal
 ventana = tk.Tk()
 ventana.title("Club de Pádel")
-ventana.geometry("900x700")  # Ajustar tamaño de la ventana
+ventana.geometry("900x850")  # Ajustar tamaño de la ventana
 
 # Título
 label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24))
@@ -241,6 +262,31 @@ boton_mostrar_horarios.grid(column=1, row=1)
 
 boton_mostrar_canchas = tk.Button(frame_resultados, text="Mostrar Canchas", command=mostrar_canchas, bg='green', fg='white', font=("Arial", 12, "bold"))
 boton_mostrar_canchas.grid(column=2, row=1)
+
+# Sección de entrada para consulta de disponibilidad de cancha
+label_cancha_consulta = tk.Label(ventana, text="ID Cancha para consulta:", font=("Arial", 12))
+label_cancha_consulta.grid(column=0, row=5)
+entry_cancha_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
+entry_cancha_consulta.grid(column=1, row=5)
+
+label_fecha_consulta = tk.Label(ventana, text="Fecha para consulta (AÑO-MES-DIA):", font=("Arial", 12))
+label_fecha_consulta.grid(column=0, row=6)
+entry_fecha_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
+entry_fecha_consulta.grid(column=1, row=6)
+
+label_hora_inicio_consulta = tk.Label(ventana, text="Hora Inicio para consulta:", font=("Arial", 12))
+label_hora_inicio_consulta.grid(column=0, row=7)
+entry_hora_inicio_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
+entry_hora_inicio_consulta.grid(column=1, row=7)
+
+label_hora_fin_consulta = tk.Label(ventana, text="Hora Fin para consulta:", font=("Arial", 12))
+label_hora_fin_consulta.grid(column=0, row=8)
+entry_hora_fin_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
+entry_hora_fin_consulta.grid(column=1, row=8)
+
+# Botón de Consultar Disponibilidad, 
+boton_consultar_disponibilidad = tk.Button(ventana, text="Consultar Disponibilidad", command=consultar_disponibilidad, bg='orange', fg='white', font=("Arial", 12, "bold"))
+boton_consultar_disponibilidad.grid(column=0, row=9, columnspan=2)
 
 ventana.mainloop()
 
