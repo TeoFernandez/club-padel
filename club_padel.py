@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter as tk 
 from tkinter import ttk
 import mysql.connector
 
@@ -65,12 +65,18 @@ def mostrar_socios():
         texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Nombre: {resultado[1]} {resultado[2]} - Teléfono: {resultado[3]} - Email: {resultado[4]}\n")
 
 # Función para mostrar horarios
+# Función para mostrar horarios
 def mostrar_horarios():
-    cursor.execute("SELECT * FROM horarios")
+    cursor.execute("""
+        SELECT horarios.id_horario, socios.nombre, socios.apellido, horarios.fecha, horarios.hora_inicio, horarios.hora_fin, horarios.id_canchas 
+        FROM horarios 
+        JOIN socios ON horarios.id_socio = socios.id_socio
+    """)
     resultados = cursor.fetchall()
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
-        texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Socio: {resultado[1]} - Fecha: {resultado[2]} - Hora inicio: {resultado[3]} - Hora fin: {resultado[4]} - Cancha: {resultado[5]}\n")
+        texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Socio: {resultado[1]} {resultado[2]} - Fecha: {resultado[3]} - Hora inicio: {resultado[4]} - Hora fin: {resultado[5]} - Cancha: {resultado[6]}\n")
+
 
 # Función para mostrar canchas
 def mostrar_canchas():
@@ -112,119 +118,120 @@ def limpiar_campos():
 # Ventana principal
 ventana = tk.Tk()
 ventana.title("Club de Pádel")
+ventana.configure(bg="yellow")  # Cambiar el color de fondo a amarillo
 
 # Título
-label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24))
+label_titulo = tk.Label(ventana, text="Club de Pádel", font=("Arial", 24), bg="yellow")
 label_titulo.grid(column=0, row=0, columnspan=2)
 
 # Frame para agregar o editar socios
-frame_socios = tk.Frame(ventana)
+frame_socios = tk.Frame(ventana, bg="yellow")
 frame_socios.grid(column=0, row=1)
 
-label_nombre = tk.Label(frame_socios, text="Nombre:")
+label_nombre = tk.Label(frame_socios, text="Nombre:", bg="yellow")
 label_nombre.grid(column=0, row=0)
 entry_nombre = tk.Entry(frame_socios)
 entry_nombre.grid(column=1, row=0)
 
-label_apellido = tk.Label(frame_socios, text="Apellido:")
+label_apellido = tk.Label(frame_socios, text="Apellido:", bg="yellow")
 label_apellido.grid(column=0, row=1)
 entry_apellido = tk.Entry(frame_socios)
 entry_apellido.grid(column=1, row=1)
 
-label_telefono = tk.Label(frame_socios, text="Teléfono:")
+label_telefono = tk.Label(frame_socios, text="Teléfono:", bg="yellow")
 label_telefono.grid(column=0, row=2)
 entry_telefono = tk.Entry(frame_socios)
 entry_telefono.grid(column=1, row=2)
 
-label_email = tk.Label(frame_socios, text="Email:")
+label_email = tk.Label(frame_socios, text="Email:", bg="yellow")
 label_email.grid(column=0, row=3)
 entry_email = tk.Entry(frame_socios)
 entry_email.grid(column=1, row=3)
 
-boton_agregar_socio = tk.Button(frame_socios, text="Agregar Socio", command=agregar_socio)
+boton_agregar_socio = tk.Button(frame_socios, text="Agregar Socio", command=agregar_socio, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_agregar_socio.grid(column=1, row=4)
 
-label_id_socio_editar = tk.Label(frame_socios, text="ID Socio a editar:")
+label_id_socio_editar = tk.Label(frame_socios, text="ID Socio a editar:", bg="yellow")
 label_id_socio_editar.grid(column=0, row=5)
 entry_id_socio_editar = tk.Entry(frame_socios)
 entry_id_socio_editar.grid(column=1, row=5)
 
-boton_editar_socio = tk.Button(frame_socios, text="Editar Socio", command=editar_socio)
+boton_editar_socio = tk.Button(frame_socios, text="Editar Socio", command=editar_socio, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_editar_socio.grid(column=1, row=6)
 
 # Frame para agregar o editar horarios
-frame_horarios = tk.Frame(ventana)
+frame_horarios = tk.Frame(ventana, bg="yellow")
 frame_horarios.grid(column=1, row=1)
 
-label_id_socio = tk.Label(frame_horarios, text="ID Socio:")
+label_id_socio = tk.Label(frame_horarios, text="ID Socio:", bg="yellow")
 label_id_socio.grid(column=0, row=0)
 combo_socios = ttk.Combobox(frame_horarios)
 combo_socios.grid(column=1, row=0)
 
-label_fecha = tk.Label(frame_horarios, text="Fecha:")
+label_fecha = tk.Label(frame_horarios, text="Fecha:", bg="yellow")
 label_fecha.grid(column=0, row=1)
 entry_fecha = tk.Entry(frame_horarios)
 entry_fecha.grid(column=1, row=1)
 
-label_hora_inicio = tk.Label(frame_horarios, text="Hora Inicio:")
+label_hora_inicio = tk.Label(frame_horarios, text="Hora Inicio:", bg="yellow")
 label_hora_inicio.grid(column=0, row=2)
 entry_hora_inicio = tk.Entry(frame_horarios)
 entry_hora_inicio.grid(column=1, row=2)
 
-label_hora_fin = tk.Label(frame_horarios, text="Hora Fin:")
+label_hora_fin = tk.Label(frame_horarios, text="Hora Fin:", bg="yellow")
 label_hora_fin.grid(column=0, row=3)
 entry_hora_fin = tk.Entry(frame_horarios)
 entry_hora_fin.grid(column=1, row=3)
 
-label_cancha = tk.Label(frame_horarios, text="Cancha:")
+label_cancha = tk.Label(frame_horarios, text="Cancha:", bg="yellow")
 label_cancha.grid(column=0, row=4)
 entry_cancha = tk.Entry(frame_horarios)
 entry_cancha.grid(column=1, row=4)
 
-boton_agregar_horario = tk.Button(frame_horarios, text="Agregar Horario", command=agregar_horario)
+boton_agregar_horario = tk.Button(frame_horarios, text="Agregar Horario", command=agregar_horario, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_agregar_horario.grid(column=1, row=5)
 
-label_id_horario_editar = tk.Label(frame_horarios, text="ID Horario a editar:")
+label_id_horario_editar = tk.Label(frame_horarios, text="ID Horario a editar:", bg="yellow")
 label_id_horario_editar.grid(column=0, row=6)
 entry_id_horario_editar = tk.Entry(frame_horarios)
 entry_id_horario_editar.grid(column=1, row=6)
 
-boton_editar_horario = tk.Button(frame_horarios, text="Editar Horario", command=editar_horario)
+boton_editar_horario = tk.Button(frame_horarios, text="Editar Horario", command=editar_horario, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_editar_horario.grid(column=1, row=7)
 
 # Frame para mostrar resultados y eliminar registros
-frame_resultados = tk.Frame(ventana)
+frame_resultados = tk.Frame(ventana, bg="yellow")
 frame_resultados.grid(column=0, row=2, columnspan=2)
 
-boton_mostrar_socios = tk.Button(frame_resultados, text="Mostrar Socios", command=mostrar_socios)
+boton_mostrar_socios = tk.Button(frame_resultados, text="Mostrar Socios", command=mostrar_socios, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_mostrar_socios.grid(column=0, row=0)
 
-boton_mostrar_horarios = tk.Button(frame_resultados, text="Mostrar Horarios", command=mostrar_horarios)
+boton_mostrar_horarios = tk.Button(frame_resultados, text="Mostrar Horarios", command=mostrar_horarios, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_mostrar_horarios.grid(column=1, row=0)
 
-boton_mostrar_canchas = tk.Button(frame_resultados, text="Mostrar Canchas", command=mostrar_canchas)
+boton_mostrar_canchas = tk.Button(frame_resultados, text="Mostrar Canchas", command=mostrar_canchas, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_mostrar_canchas.grid(column=2, row=0)
 
 texto_resultados = tk.Text(frame_resultados, height=10, width=80)
 texto_resultados.grid(column=0, row=1, columnspan=3)
 
-frame_eliminar = tk.Frame(ventana)
+frame_eliminar = tk.Frame(ventana, bg="yellow")
 frame_eliminar.grid(column=0, row=3, columnspan=2)
 
-label_id_socio_eliminar = tk.Label(frame_eliminar, text="ID Socio a eliminar:")
+label_id_socio_eliminar = tk.Label(frame_eliminar, text="ID Socio a eliminar:", bg="yellow")
 label_id_socio_eliminar.grid(column=0, row=0)
 entry_id_socio_eliminar = tk.Entry(frame_eliminar)
 entry_id_socio_eliminar.grid(column=1, row=0)
 
-boton_eliminar_socio = tk.Button(frame_eliminar, text="Eliminar Socio", command=eliminar_socio)
+boton_eliminar_socio = tk.Button(frame_eliminar, text="Eliminar Socio", command=eliminar_socio, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_eliminar_socio.grid(column=1, row=1)
 
-label_id_horario_eliminar = tk.Label(frame_eliminar, text="ID Horario a eliminar:")
+label_id_horario_eliminar = tk.Label(frame_eliminar, text="ID Horario a eliminar:", bg="yellow")
 label_id_horario_eliminar.grid(column=0, row=2)
 entry_id_horario_eliminar = tk.Entry(frame_eliminar)
 entry_id_horario_eliminar.grid(column=1, row=2)
 
-boton_eliminar_horario = tk.Button(frame_eliminar, text="Eliminar Horario", command=eliminar_horario)
+boton_eliminar_horario = tk.Button(frame_eliminar, text="Eliminar Horario", command=eliminar_horario, bg="blue", fg="white", font=("Arial", 10, "bold"))
 boton_eliminar_horario.grid(column=1, row=3)
 
 # Inicializar combobox de socios
