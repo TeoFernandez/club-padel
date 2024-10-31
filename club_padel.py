@@ -27,7 +27,7 @@ def agregar_horario():
     hora_inicio = entry_hora_inicio.get()
     hora_fin = entry_hora_fin.get()
     cancha = entry_cancha.get()
-    cursor.execute("INSERT INTO horarios (id_socio, fecha, hora_inicio, hora_fin, cancha) VALUES (%s, %s, %s, %s, %s)", (id_socio, fecha, hora_inicio, hora_fin, cancha))
+    cursor.execute("INSERT INTO horarios (id_socio, fecha, hora_inicio, hora_fin, id_canchas) VALUES (%s, %s, %s, %s, %s)", (id_socio, fecha, hora_inicio, hora_fin, cancha))
     cnx.commit()
     limpiar_campos()
 
@@ -50,9 +50,9 @@ def editar_horario():
     fecha = entry_fecha.get()
     hora_inicio = entry_hora_inicio.get()
     hora_fin = entry_hora_fin.get()
-    cancha = entry_cancha.get()
-    cursor.execute("UPDATE horarios SET id_socio = %s, fecha = %s, hora_inicio = %s, hora_fin = %s, cancha = %s WHERE id_horario = %s", 
-                (id_socio, fecha, hora_inicio, hora_fin, cancha, id_horario))
+    id_canchas = entry_cancha.get()
+    cursor.execute("UPDATE horarios SET id_socio = %s, fecha = %s, hora_inicio = %s, hora_fin = %s, id_canchas = %s WHERE id_horario = %s", 
+                (id_socio, fecha, hora_inicio, hora_fin, id_canchas, id_horario))
     cnx.commit()
     limpiar_campos()
 
@@ -71,6 +71,14 @@ def mostrar_horarios():
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
         texto_resultados.insert(tk.END, f"ID: {resultado[0]} - Socio: {resultado[1]} - Fecha: {resultado[2]} - Hora inicio: {resultado[3]} - Hora fin: {resultado[4]} - Cancha: {resultado[5]}\n")
+
+# Función para mostrar canchas
+def mostrar_canchas():
+    cursor.execute("SELECT * FROM canchas")
+    resultados = cursor.fetchall()
+    texto_resultados.delete(1.0, tk.END)
+    for resultado in resultados:
+        texto_resultados.insert(tk.END, f"ID Cancha: {resultado[0]} - : {resultado[1]} - Estado: {resultado[2]}\n")
 
 # Función para eliminar un socio
 def eliminar_socio():
@@ -194,8 +202,11 @@ boton_mostrar_socios.grid(column=0, row=0)
 boton_mostrar_horarios = tk.Button(frame_resultados, text="Mostrar Horarios", command=mostrar_horarios)
 boton_mostrar_horarios.grid(column=1, row=0)
 
+boton_mostrar_canchas = tk.Button(frame_resultados, text="Mostrar Canchas", command=mostrar_canchas)
+boton_mostrar_canchas.grid(column=2, row=0)
+
 texto_resultados = tk.Text(frame_resultados, height=10, width=80)
-texto_resultados.grid(column=0, row=1, columnspan=2)
+texto_resultados.grid(column=0, row=1, columnspan=3)
 
 frame_eliminar = tk.Frame(ventana)
 frame_eliminar.grid(column=0, row=3, columnspan=2)
