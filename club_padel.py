@@ -235,7 +235,7 @@ entry_id_socio_eliminar = tk.Entry(frame_eliminar, width=30, font=("Arial", 12))
 entry_id_socio_eliminar.grid(column=1, row=0)
 
 boton_eliminar_socio = tk.Button(frame_eliminar, text="Eliminar Socio", command=eliminar_socio, bg='red', fg='white', font=("Arial", 12, "bold"))
-boton_eliminar_socio.grid(column=1, row=1)
+boton_eliminar_socio.grid(column=2, row=0)
 
 label_id_horario_eliminar = tk.Label(frame_eliminar, text="ID Horario a eliminar:", font=("Arial", 12))
 label_id_horario_eliminar.grid(column=0, row=2)
@@ -243,7 +243,7 @@ entry_id_horario_eliminar = tk.Entry(frame_eliminar, width=30, font=("Arial", 12
 entry_id_horario_eliminar.grid(column=1, row=2)
 
 boton_eliminar_horario = tk.Button(frame_eliminar, text="Eliminar Horario", command=eliminar_horario, bg='red', fg='white', font=("Arial", 12, "bold"))
-boton_eliminar_horario.grid(column=1, row=3)
+boton_eliminar_horario.grid(column=2, row=2)
 espacio2 = tk.Label(frame_eliminar, text=" ", font=("Arial", 12))
 espacio2.grid(column=0, row=4)
 
