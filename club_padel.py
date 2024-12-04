@@ -83,14 +83,42 @@ def mostrar_canchas():
     resultados = cursor.fetchall()
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
-        texto_resultados.insert(tk.END, f"Cancha: {resultado[0]} - Superficie: {resultado[1]} - Estado: {resultado[2]}\n")
+        texto_resultados.insert(tk.END, f"Cancha: {resultado[0]} - Superficie: {resultado[1]}\n")
 
 # Función para eliminar un socio
 def eliminar_socio():
-    id_socio = entry_id_socio_eliminar.get()
-    cursor.execute("DELETE FROM socios WHERE id_socio = %s", (id_socio,))
-    cnx.commit()
-    limpiar_campos()
+    id_socio = entry_id_socio_eliminar.get().strip()  # Obtiene el valor y elimina espacios adicionales
+    
+    # Validar que el campo no esté vacío
+    if not id_socio:
+        texto_resultados.delete(1.0, tk.END)
+        texto_resultados.insert(tk.END, "Error: El campo de ID está vacío.\n")
+        return
+    
+    # Validar que el ID sea un número
+    if not id_socio.isdigit():
+        texto_resultados.delete(1.0, tk.END)
+        texto_resultados.insert(tk.END, "Error: El ID debe ser un número.\n")
+        return
+
+    # Intentar eliminar el socio
+    try:
+        cursor.execute("DELETE FROM socios WHERE id_socio = %s", (int(id_socio),))
+        cnx.commit()
+        
+        # Verificar si se eliminó algún registro
+        if cursor.rowcount == 0:
+            texto_resultados.delete(1.0, tk.END)
+            texto_resultados.insert(tk.END, f"No se encontró ningún socio con ID {id_socio}.\n")
+        else:
+            texto_resultados.delete(1.0, tk.END)
+            texto_resultados.insert(tk.END, f"Socio con ID {id_socio} eliminado correctamente.\n")
+        
+        limpiar_campos()  # Limpiar campos después de eliminar
+    except mysql.connector.Error as err:
+        texto_resultados.delete(1.0, tk.END)
+        texto_resultados.insert(tk.END, f"Error al eliminar socio: {err}\n")
+
 
 # Función para eliminar un horario
 def eliminar_horario():
