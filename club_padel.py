@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as messagebox
 import mysql.connector
+from tkinter import *
 
 # Conexión a la base de datos
 cnx = mysql.connector.connect(host="localhost",
@@ -106,15 +107,20 @@ def mostrar_socios():
 # Función para mostrar horarios
 def mostrar_horarios():
     cursor.execute("""
-        SELECT horarios.id_horario, socios.nombre, socios.apellido, horarios.fecha, 
-        horarios.hora_inicio, horarios.hora_fin, horarios.id_canchas 
+        SELECT horarios.id_horario, socios.nombre, socios.apellido, horarios.fecha, horarios.hora_inicio, horarios.hora_fin, horarios.id_canchas 
         FROM horarios 
         JOIN socios ON horarios.id_socio = socios.id_socio
+        ORDER BY horarios.fecha DESC, horarios.hora_inicio DESC
     """)
     resultados = cursor.fetchall()
     texto_resultados.delete(1.0, tk.END)
     for resultado in resultados:
-        texto_resultados.insert(tk.END, f"ID:{resultado[0]}-Socio:{resultado[1]} {resultado[2]} - Fecha: {resultado[3]} - Hora inicio: {resultado[4]} - Hora fin: {resultado[5]} - Cancha: {resultado[6]}\n")
+        texto_resultados.insert(
+            tk.END, 
+            f"ID:{resultado[0]}- Socio: {resultado[1]} {resultado[2]} - Fecha: {resultado[3]} "
+            f"- Hora inicio: {resultado[4]} - Hora fin: {resultado[5]} - Cancha: {resultado[6]}\n"
+        )
+
 
 # Función para mostrar canchas
 def mostrar_canchas():
@@ -126,21 +132,25 @@ def mostrar_canchas():
 
 # Función para eliminar un socio
 def eliminar_socio():
-    id_socio = entry_id_socio_eliminar.get().strip()  # Obtiene el valor y elimina espacios adicionales
+    id_socio = entry_id_socio_eliminar.get().strip()  
+    
     # Validar que el campo no esté vacío
     if not id_socio:
         texto_resultados.delete(1.0, tk.END)
         texto_resultados.insert(tk.END, "Error: El campo de ID está vacío.\n")
         return
+    
     # Validar que el ID sea un número
     if not id_socio.isdigit():
         texto_resultados.delete(1.0, tk.END)
         texto_resultados.insert(tk.END, "Error: El ID debe ser un número.\n")
         return
+    
     # Intentar eliminar el socio
     try:
         cursor.execute("DELETE FROM socios WHERE id_socio = %s", (int(id_socio),))
         cnx.commit()
+        
         # Verificar si se eliminó algún registro
         if cursor.rowcount == 0:
             texto_resultados.delete(1.0, tk.END)
@@ -161,23 +171,62 @@ def eliminar_horario():
     cnx.commit()
     limpiar_campos()
 
-# Función para consultar disponibilidad de la cancha
-def consultar_disponibilidad():
-    id_cancha = entry_cancha_consulta.get()
-    fecha = entry_fecha_consulta.get()
-    hora_inicio = entry_hora_inicio_consulta.get()
-    hora_fin = entry_hora_fin_consulta.get()
+def cargar_ids_canchas():
     try:
-        # Ejecutar el procedimiento almacenado
-        cursor.callproc("alquiler_cancha", (id_cancha, fecha, hora_inicio, hora_fin))
-        # Recuperar resultados
-        for result in cursor.stored_results():
-            disponibilidad = result.fetchone()[0]
-        texto_resultados.delete(1.0, tk.END)
-        texto_resultados.insert(tk.END, f"Resultado: {disponibilidad}\n")
-    except mysql.connector.Error as err:
-        texto_resultados.delete(1.0, tk.END)
-        texto_resultados.insert(tk.END, f"Error: {err}\n")
+        cursor.execute("SELECT id_canchas FROM canchas")
+        ids_canchas = [str(row[0]) for row in cursor.fetchall()]
+        combo_cancha_buscar["values"] = ids_canchas
+        if ids_canchas:
+            combo_cancha_buscar.current(0)  # Establecer el primer valor como predeterminado
+    except Exception as e:
+        messagebox.showerror("Error", f"Hubo un error al cargar los IDs de las canchas: {str(e)}")
+
+def buscar_horarios_por_dia():
+    # Obtener el día, hora de inicio, hora de fin y cancha seleccionados
+    dia_seleccionado = entry_dia.get()
+    hora_inicio_seleccionada = entry_hora_inicio_buscar.get()
+    hora_fin_seleccionada = entry_hora_fin_buscar.get()
+    id_cancha_seleccionada = combo_cancha_buscar.get()
+
+    # Verificar que el día no esté vacío
+    if not dia_seleccionado:
+        messagebox.showerror("Error", "Por favor ingresa una fecha para buscar.")
+        return
+
+    # Construir la consulta base
+    query = "SELECT id_horario, id_canchas, fecha, hora_inicio, hora_fin FROM horarios WHERE fecha = %s"
+    params = [dia_seleccionado]
+
+    # Agregar filtros opcionales a la consulta
+    if hora_inicio_seleccionada:
+        query += " AND hora_inicio >= %s"
+        params.append(hora_inicio_seleccionada)
+    
+    if hora_fin_seleccionada:
+        query += " AND hora_fin <= %s"
+        params.append(hora_fin_seleccionada)
+    
+    if id_cancha_seleccionada:
+        query += " AND id_canchas = %s"
+        params.append(id_cancha_seleccionada)
+
+    # Ejecutar la consulta
+    try:
+        cursor.execute(query, tuple(params))
+        resultados = cursor.fetchall()
+
+        # Mostrar los resultados
+        if resultados:
+            resultados_str = "\n".join([f"ID Horario: {r[0]}, Cancha: {r[1]}, Fecha: {r[2]}, Inicio: {r[3]}, Fin: {r[4]}" for r in resultados])
+            messagebox.showinfo("Horarios encontrados", resultados_str)
+        else:
+            messagebox.showinfo("Sin resultados", "No se encontraron horarios con los filtros aplicados.")
+    except Exception as e:
+        messagebox.showerror("Error de consulta", f"Hubo un error al realizar la consulta: {str(e)}")
+    
+    # Limpiar campos después de buscar
+    limpiar_campos()
+
 
 # Función para limpiar campos
 def limpiar_campos():
@@ -320,34 +369,36 @@ boton_mostrar_horarios.grid(column=1, row=1)
 boton_mostrar_canchas = tk.Button(frame_resultados, text="Mostrar Canchas", command=mostrar_canchas, bg='green', fg='white', font=("Arial", 12, "bold"))
 boton_mostrar_canchas.grid(column=2, row=1)
 
-# Sección de entrada para consulta de disponibilidad de cancha
-label_cancha_consulta = tk.Label(ventana, text="ID Cancha para consulta:", font=("Arial", 12))
-label_cancha_consulta.grid(column=0, row=5)
-entry_cancha_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
-entry_cancha_consulta.grid(column=1, row=5)
+# Etiqueta y entrada para el día
+Label(ventana, text="Día (Buscar):").grid(row=6, column=0)
+entry_dia = Entry(ventana)
+entry_dia.grid(row=6, column=1)
 
-label_fecha_consulta = tk.Label(ventana, text="Fecha para consulta (AÑO-MES-DIA):", font=("Arial", 12))
-label_fecha_consulta.grid(column=0, row=6)
-entry_fecha_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
-entry_fecha_consulta.grid(column=1, row=6)
+# Etiqueta y entrada para hora de inicio (buscar)
+Label(ventana, text="Hora Inicio (Buscar):").grid(row=7, column=0)
+entry_hora_inicio_buscar = Entry(ventana)
+entry_hora_inicio_buscar.grid(row=7, column=1)
 
-label_hora_inicio_consulta = tk.Label(ventana, text="Hora Inicio para consulta:", font=("Arial", 12))
-label_hora_inicio_consulta.grid(column=0, row=7)
-entry_hora_inicio_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
-entry_hora_inicio_consulta.grid(column=1, row=7)
+# Etiqueta y entrada para hora de fin (buscar)
+Label(ventana, text="Hora Fin (Buscar):").grid(row=8, column=0)
+entry_hora_fin_buscar = Entry(ventana)
+entry_hora_fin_buscar.grid(row=8, column=1)
 
-label_hora_fin_consulta = tk.Label(ventana, text="Hora Fin para consulta:", font=("Arial", 12))
-label_hora_fin_consulta.grid(column=0, row=8)
-entry_hora_fin_consulta = tk.Entry(ventana, width=30, font=("Arial", 12))
-entry_hora_fin_consulta.grid(column=1, row=8)
+# Etiqueta y combobox para cancha (buscar)
+Label(ventana, text="ID Cancha (Buscar):").grid(row=9, column=0)
+combo_cancha_buscar = ttk.Combobox(ventana)
+combo_cancha_buscar.grid(row=9, column=1)
 
-# Botón de Consultar Disponibilidad, 
-boton_consultar_disponibilidad = tk.Button(ventana, text="Consultar Disponibilidad", command=consultar_disponibilidad, bg='orange', fg='white', font=("Arial", 12, "bold"))
-boton_consultar_disponibilidad.grid(column=0, row=9, columnspan=2)
+# Cargar los valores de las canchas al iniciar
+cargar_ids_canchas()
+
+# Botón para buscar horarios con filtros
+btn_buscar = Button(ventana, text="Buscar Horarios", command=buscar_horarios_por_dia)
+btn_buscar.grid(row=10, columnspan=2)
+
+
 
 cargar_ids()
 ventana.mainloop()
-
-# Cerrar cursor y conexión
 cursor.close()
 cnx.close()
