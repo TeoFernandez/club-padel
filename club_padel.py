@@ -31,28 +31,46 @@ def agregar_horario():
     cnx.commit()
     limpiar_campos()
 
-# Función para editar un socio
+# Función para cargar IDs en los desplegables
+def cargar_ids():
+    # Cargar IDs de socios
+    cursor.execute("SELECT id_socio FROM socios")
+    ids_socios = [str(row[0]) for row in cursor.fetchall()]
+    combo_id_socio_editar["values"] = ids_socios
+    combo_id_socio_editar.current(0)
+
+    # Cargar IDs de horarios
+    cursor.execute("SELECT id_horario FROM horarios")
+    ids_horarios = [str(row[0]) for row in cursor.fetchall()]
+    combo_id_horario_editar["values"] = ids_horarios
+    combo_id_horario_editar.current(0)
+
+# Función para editar un socio (modificada para usar Combobox)
 def editar_socio():
-    id_socio = entry_id_socio_editar.get()
+    id_socio = combo_id_socio_editar.get()
     nombre = entry_nombre.get()
     apellido = entry_apellido.get()
     telefono = entry_telefono.get()
     email = entry_email.get()
-    cursor.execute("UPDATE socios SET nombre = %s, apellido = %s, telefono = %s, email = %s WHERE id_socio = %s", 
-                (nombre, apellido, telefono, email, id_socio))
+    cursor.execute(
+        "UPDATE socios SET nombre = %s, apellido = %s, telefono = %s, email = %s WHERE id_socio = %s",
+        (nombre, apellido, telefono, email, id_socio)
+    )
     cnx.commit()
     limpiar_campos()
 
-# Función para editar un horario
+# Función para editar un horario (modificada para usar Combobox)
 def editar_horario():
-    id_horario = entry_id_horario_editar.get()
+    id_horario = combo_id_horario_editar.get()
     id_socio = combo_socios.get()
     fecha = entry_fecha.get()
     hora_inicio = entry_hora_inicio.get()
     hora_fin = entry_hora_fin.get()
     id_canchas = entry_cancha.get()
-    cursor.execute("UPDATE horarios SET id_socio = %s, fecha = %s, hora_inicio = %s, hora_fin = %s, id_canchas = %s WHERE id_horario = %s", 
-                (id_socio, fecha, hora_inicio, hora_fin, id_canchas, id_horario))
+    cursor.execute(
+        "UPDATE horarios SET id_socio = %s, fecha = %s, hora_inicio = %s, hora_fin = %s, id_canchas = %s WHERE id_horario = %s",
+        (id_socio, fecha, hora_inicio, hora_fin, id_canchas, id_horario)
+    )
     cnx.commit()
     limpiar_campos()
 
@@ -158,8 +176,6 @@ def limpiar_campos():
     entry_hora_inicio.delete(0, tk.END)
     entry_hora_fin.delete(0, tk.END)
     entry_cancha.delete(0, tk.END)
-    entry_id_socio_editar.delete(0, tk.END)
-    entry_id_horario_editar.delete(0, tk.END)
     entry_id_socio_eliminar.delete(0, tk.END)
     entry_id_horario_eliminar.delete(0, tk.END)
 
@@ -204,8 +220,8 @@ boton_agregar_socio.grid(column=1, row=4)
 
 label_id_socio_editar = tk.Label(frame_socios, text="ID Socio a editar:", font=("Arial", 12))
 label_id_socio_editar.grid(column=0, row=5)
-entry_id_socio_editar = tk.Entry(frame_socios, width=30, font=("Arial", 12))
-entry_id_socio_editar.grid(column=1, row=5)
+combo_id_socio_editar = ttk.Combobox(frame_socios, width=30, font=("Arial", 12))
+combo_id_socio_editar.grid(column=1, row=5)
 
 boton_editar_socio = tk.Button(frame_socios, text="Editar Socio", command=editar_socio, bg='blue', fg='white', font=("Arial", 12, "bold"))
 boton_editar_socio.grid(column=1, row=6)
@@ -244,8 +260,8 @@ boton_agregar_horario.grid(column=1, row=5)
 
 label_id_horario_editar = tk.Label(frame_horarios, text="ID Horario a editar:", font=("Arial", 12))
 label_id_horario_editar.grid(column=0, row=6)
-entry_id_horario_editar = tk.Entry(frame_horarios, width=30, font=("Arial", 12))
-entry_id_horario_editar.grid(column=1, row=6)
+combo_id_horario_editar = ttk.Combobox(frame_horarios, width=30, font=("Arial", 12))
+combo_id_horario_editar.grid(column=1, row=6)
 
 boton_editar_horario = tk.Button(frame_horarios, text="Editar Horario", command=editar_horario, bg='blue', fg='white', font=("Arial", 12, "bold"))
 boton_editar_horario.grid(column=1, row=7)
@@ -316,6 +332,7 @@ entry_hora_fin_consulta.grid(column=1, row=8)
 boton_consultar_disponibilidad = tk.Button(ventana, text="Consultar Disponibilidad", command=consultar_disponibilidad, bg='orange', fg='white', font=("Arial", 12, "bold"))
 boton_consultar_disponibilidad.grid(column=0, row=9, columnspan=2)
 
+cargar_ids()
 ventana.mainloop()
 
 # Cerrar cursor y conexión
