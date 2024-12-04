@@ -1,5 +1,6 @@
 import tkinter as tk   
 from tkinter import ttk
+import tkinter.messagebox as messagebox
 import mysql.connector
 
 # Conexión a la base de datos
@@ -26,10 +27,31 @@ def agregar_horario():
     fecha = entry_fecha.get()
     hora_inicio = entry_hora_inicio.get()
     hora_fin = entry_hora_fin.get()
-    cancha = entry_cancha.get()
-    cursor.execute("INSERT INTO horarios (id_socio, fecha, hora_inicio, hora_fin, id_canchas) VALUES (%s, %s, %s, %s, %s)", (id_socio, fecha, hora_inicio, hora_fin, cancha))
-    cnx.commit()
-    limpiar_campos()
+    id_cancha = entry_cancha.get()
+
+    # Consulta para verificar si la cancha ya está ocupada
+    cursor.execute("""
+        SELECT COUNT(*) 
+        FROM horarios 
+        WHERE id_canchas = %s AND fecha = %s AND 
+            ((hora_inicio < %s AND hora_fin > %s) OR
+            (hora_inicio < %s AND hora_fin > %s) OR
+            (hora_inicio >= %s AND hora_fin <= %s))
+    """, (id_cancha, fecha, hora_fin, hora_inicio, hora_fin, hora_inicio, hora_inicio, hora_fin))
+    ocupada = cursor.fetchone()[0]
+
+    if ocupada > 0:
+        messagebox.showerror("Error", "Esta cancha en este horario ya está ocupada")
+    else:
+        # Si no está ocupada, agregar el horario
+        cursor.execute("""
+            INSERT INTO horarios (id_socio, fecha, hora_inicio, hora_fin, id_canchas)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (id_socio, fecha, hora_inicio, hora_fin, id_cancha))
+        cnx.commit()
+        messagebox.showinfo("Éxito", "Horario agregado correctamente")
+        limpiar_campos()
+
 
 # Función para cargar IDs en los desplegables
 def cargar_ids():
@@ -38,7 +60,6 @@ def cargar_ids():
     ids_socios = [str(row[0]) for row in cursor.fetchall()]
     combo_id_socio_editar["values"] = ids_socios
     combo_id_socio_editar.current(0)
-
     # Cargar IDs de horarios
     cursor.execute("SELECT id_horario FROM horarios")
     ids_horarios = [str(row[0]) for row in cursor.fetchall()]
@@ -106,24 +127,20 @@ def mostrar_canchas():
 # Función para eliminar un socio
 def eliminar_socio():
     id_socio = entry_id_socio_eliminar.get().strip()  # Obtiene el valor y elimina espacios adicionales
-    
     # Validar que el campo no esté vacío
     if not id_socio:
         texto_resultados.delete(1.0, tk.END)
         texto_resultados.insert(tk.END, "Error: El campo de ID está vacío.\n")
         return
-    
     # Validar que el ID sea un número
     if not id_socio.isdigit():
         texto_resultados.delete(1.0, tk.END)
         texto_resultados.insert(tk.END, "Error: El ID debe ser un número.\n")
         return
-
     # Intentar eliminar el socio
     try:
         cursor.execute("DELETE FROM socios WHERE id_socio = %s", (int(id_socio),))
         cnx.commit()
-        
         # Verificar si se eliminó algún registro
         if cursor.rowcount == 0:
             texto_resultados.delete(1.0, tk.END)
@@ -131,7 +148,6 @@ def eliminar_socio():
         else:
             texto_resultados.delete(1.0, tk.END)
             texto_resultados.insert(tk.END, f"Socio con ID {id_socio} eliminado correctamente.\n")
-        
         limpiar_campos()  # Limpiar campos después de eliminar
     except mysql.connector.Error as err:
         texto_resultados.delete(1.0, tk.END)
@@ -151,15 +167,12 @@ def consultar_disponibilidad():
     fecha = entry_fecha_consulta.get()
     hora_inicio = entry_hora_inicio_consulta.get()
     hora_fin = entry_hora_fin_consulta.get()
-    
     try:
         # Ejecutar el procedimiento almacenado
         cursor.callproc("alquiler_cancha", (id_cancha, fecha, hora_inicio, hora_fin))
-        
         # Recuperar resultados
         for result in cursor.stored_results():
             disponibilidad = result.fetchone()[0]
-        
         texto_resultados.delete(1.0, tk.END)
         texto_resultados.insert(tk.END, f"Resultado: {disponibilidad}\n")
     except mysql.connector.Error as err:
