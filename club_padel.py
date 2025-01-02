@@ -396,8 +396,6 @@ cargar_ids_canchas()
 btn_buscar = Button(ventana, text="Buscar Horarios", command=buscar_horarios_por_dia)
 btn_buscar.grid(row=10, columnspan=2)
 
-
-
 cargar_ids()
 ventana.mainloop()
 cursor.close()
