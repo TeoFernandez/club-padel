@@ -400,3 +400,4 @@ cargar_ids()
 ventana.mainloop()
 cursor.close()
 cnx.close()
+#fin del programa
