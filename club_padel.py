@@ -182,7 +182,7 @@ def cargar_ids_canchas():
         messagebox.showerror("Error", f"Hubo un error al cargar los IDs de las canchas: {str(e)}")
 
 def buscar_horarios_por_dia():
-    # Obtener el día, hora de inicio, hora de fin y cancha seleccionados
+    # Obtener el día, hora de inicio, hora de fin y cancha seleccionados..
     dia_seleccionado = entry_dia.get()
     hora_inicio_seleccionada = entry_hora_inicio_buscar.get()
     hora_fin_seleccionada = entry_hora_fin_buscar.get()
