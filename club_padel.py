@@ -7,9 +7,9 @@ from tkinter import *
 # Conexión a la base de datos
 cnx = mysql.connector.connect(host="localhost",
                             user="root",
-                            password="1234",
+                            password="",
                             database="clubpadel",
-                            port="3307")
+                            )
 cursor = cnx.cursor()
 
 # Función para agregar un socio
