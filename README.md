@@ -1,4 +1,4 @@
-# 🏓 Club Pádel - Sistema de Gestión
+# 🎾 Club Pádel - Sistema de Gestión
 
 Sistema de Escritorio para la gestión de canchas, socios y alquileres de un club de pádel. Esta aplicación permite administrar de forma eficiente el uso de las instalaciones y el registro de socios mediante una interfaz gráfica amigable.
 
